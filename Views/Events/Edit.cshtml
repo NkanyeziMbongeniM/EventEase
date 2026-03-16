@@ -1,0 +1,24 @@
+﻿@model EventEase.Models.Event
+
+<h2>Edit Event</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="EventID" />
+    <div>
+        <label asp-for="EventName"></label>
+        <input asp-for="EventName" />
+    </div>
+    <div>
+        <label asp-for="EventDate"></label>
+        <input asp-for="EventDate" type="datetime-local" />
+    </div>
+    <div>
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description"></textarea>
+    </div>
+    <div>
+        <label asp-for="VenueID"></label>
+        <select asp-for="VenueID" asp-items="@(new SelectList(ViewBag.Venues, "VenueID", "VenueName"))"></select>
+    </div>
+    <button type="submit">Save</button>
+</form>

@@ -1,0 +1,10 @@
+﻿@model EventEase.Models.Booking
+
+<h2>Booking Details</h2>
+
+<p><strong>Event:</strong> @Model.Event.EventName</p>
+<p><strong>Venue:</strong> @Model.Venue.VenueName</p>
+<p><strong>Date:</strong> @Model.BookingDate</p>
+
+<a asp-action="Edit" asp-route-id="@Model.BookingID">Edit</a> |
+<a asp-action="Index">Back to List</a>

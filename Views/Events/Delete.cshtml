@@ -1,0 +1,11 @@
+﻿@model EventEase.Models.Event
+
+<h2>Delete Event</h2>
+
+<p>Are you sure you want to delete @Model.EventName?</p>
+
+<form asp-action="DeleteConfirmed" asp-route-id="@Model.EventID">
+    <input type="hidden" asp-for="EventID" />
+    <button type="submit">Delete</button>
+    <a asp-action="Index">Cancel</a>
+</form>

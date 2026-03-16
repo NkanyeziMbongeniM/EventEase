@@ -1,0 +1,23 @@
+﻿@model EventEase.Models.Venue
+
+<h2>Create Venue</h2>
+
+<form asp-action="Create">
+    <div>
+        <label asp-for="VenueName"></label>
+        <input asp-for="VenueName" />
+    </div>
+    <div>
+        <label asp-for="Location"></label>
+        <input asp-for="Location" />
+    </div>
+    <div>
+        <label asp-for="Capacity"></label>
+        <input asp-for="Capacity" type="number" />
+    </div>
+    <div>
+        <label asp-for="ImageUrl"></label>
+        <input asp-for="ImageUrl" />
+    </div>
+    <button type="submit">Save</button>
+</form>

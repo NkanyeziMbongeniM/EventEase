@@ -1,0 +1,25 @@
+﻿@model EventEase.Models.Booking
+@{
+    ViewBag.Events = new SelectList(ViewBag.EventsList, "EventID", "EventName");
+    ViewBag.Venues = new SelectList(ViewBag.VenuesList, "VenueID", "VenueName");
+}
+
+<h2>Create Booking</h2>
+
+<form asp-action="Create">
+    <div>
+        <label asp-for="EventID"></label>
+        <select asp-for="EventID" asp-items="ViewBag.Events" class="form-control"></select>
+    </div>
+    <div>
+        <label asp-for="VenueID"></label>
+        <select asp-for="VenueID" asp-items="ViewBag.Venues" class="form-control"></select>
+    </div>
+    <div>
+        <label asp-for="BookingDate"></label>
+        <input asp-for="BookingDate" type="datetime-local" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<a asp-action="Index">Back to List</a>
