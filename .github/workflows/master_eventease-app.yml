@@ -52,4 +52,4 @@ jobs:
           app-name: 'eventease-app'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7433BF8F5D7B45A1868E4D7B278621B6 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B23A21A28B6F498C95BCB9A754741622 }}
