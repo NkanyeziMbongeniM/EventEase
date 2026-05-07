@@ -1,11 +1,10 @@
-﻿@model EventEase.Models.Event
+@model EventEase.Models.Event
 
 <h2>Event Details</h2>
+<p><strong>Name:</strong> @Model.EventName</p>
+<p><strong>Date:</strong> @Model.EventDate.ToString("yyyy-MM-dd HH:mm")</p>
+<p><strong>Description:</strong> @Model.Description</p>
+<p><strong>Venue:</strong> @Model.Venue?.VenueName</p>
 
-<p>@Model.EventName</p>
-<p>@Model.EventDate</p>
-<p>@Model.Description</p>
-<p>Venue: @Model.Venue.VenueName</p>
-
-<a asp-action="Edit" asp-route-id="@Model.EventID">Edit</a>
-<a asp-action="Index">Back to List</a>
+<a asp-action="Edit" asp-route-id="@Model.EventID" class="btn btn-warning">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

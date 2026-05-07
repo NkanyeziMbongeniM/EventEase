@@ -1,11 +1,11 @@
-﻿@model EventEase.Models.Event
+@model EventEase.Models.Event
 
 <h2>Delete Event</h2>
+<p class="text-danger">Events linked to active bookings cannot be deleted.</p>
+<p>Are you sure you want to delete <strong>@Model.EventName</strong>?</p>
 
-<p>Are you sure you want to delete @Model.EventName?</p>
-
-<form asp-action="DeleteConfirmed" asp-route-id="@Model.EventID">
+<form asp-action="Delete" asp-route-id="@Model.EventID" method="post">
     <input type="hidden" asp-for="EventID" />
-    <button type="submit">Delete</button>
-    <a asp-action="Index">Cancel</a>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

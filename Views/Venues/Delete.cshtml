@@ -1,10 +1,10 @@
-﻿@model EventEase.Models.Venue
+@model EventEase.Models.Venue
 
 <h2>Delete Venue</h2>
-
+<p class="text-danger">Venues linked to existing events or bookings cannot be deleted.</p>
 <p>Are you sure you want to delete <strong>@Model.VenueName</strong>?</p>
 
-<form asp-action="DeleteConfirmed" asp-route-id="@Model.VenueID">
+<form asp-action="Delete" asp-route-id="@Model.VenueID" method="post">
     <input type="hidden" asp-for="VenueID" />
     <button type="submit" class="btn btn-danger">Delete</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>

@@ -1,26 +1,39 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using EventEase.Models;
-using System.Collections.Generic;
-using System.Linq;
+using EventEase.Services;
 
 namespace EventEase.Controllers
 {
     public class VenuesController : Controller
     {
-        private static List<Venue> venues = new List<Venue>
-        {
-            new Venue { VenueID = 1, VenueName = "Stadium A", Location = "City X", Capacity = 5000, ImageUrl = "" },
-            new Venue { VenueID = 2, VenueName = "Gallery B", Location = "City Y", Capacity = 200, ImageUrl = "" }
-        };
+        private readonly EventEaseContext _context;
+        private readonly BlobStorageService _blobStorageService;
 
-        public IActionResult Index()
+        public VenuesController(EventEaseContext context, BlobStorageService blobStorageService)
         {
-            return View(venues);
+            _context = context;
+            _blobStorageService = blobStorageService;
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Index(string? searchString)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
+            ViewData["CurrentFilter"] = searchString;
+
+            var venues = from v in _context.Venues select v;
+
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                venues = venues.Where(v => v.VenueName.Contains(searchString) || v.Location.Contains(searchString));
+            }
+
+            return View(await venues.ToListAsync());
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+            var venue = await _context.Venues.FirstOrDefaultAsync(v => v.VenueID == id);
             if (venue == null) return NotFound();
             return View(venue);
         }
@@ -31,53 +44,102 @@ namespace EventEase.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Venue venue)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Venue venue, IFormFile? imageFile)
         {
-            venue.VenueID = venues.Count + 1;
-            venues.Add(venue);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    venue.ImageUrl = await _blobStorageService.UploadFileAsync(imageFile);
+                }
+
+                if (string.IsNullOrEmpty(venue.ImageUrl))
+                {
+                    venue.ImageUrl = "/images/defaultvenue.jpg";
+                }
+
+                _context.Add(venue);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Venue created successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(venue);
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
+            if (id == null) return NotFound();
+            var venue = await _context.Venues.FindAsync(id);
             if (venue == null) return NotFound();
             return View(venue);
         }
 
         [HttpPost]
-        public IActionResult Edit(Venue venue)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Venue venue, IFormFile? imageFile)
         {
-            var existingVenue = venues.FirstOrDefault(v => v.VenueID == venue.VenueID);
+            if (id != venue.VenueID) return NotFound();
 
-            if (existingVenue != null)
+            if (ModelState.IsValid)
             {
-                existingVenue.VenueName = venue.VenueName;
-                existingVenue.Location = venue.Location;
-                existingVenue.Capacity = venue.Capacity;
-                existingVenue.ImageUrl = venue.ImageUrl;
-            }
+                try
+                {
+                    var existingVenue = await _context.Venues.AsNoTracking().FirstOrDefaultAsync(v => v.VenueID == id);
+                    if (existingVenue == null) return NotFound();
 
-            return RedirectToAction("Index");
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        venue.ImageUrl = await _blobStorageService.UploadFileAsync(imageFile);
+                    }
+                    else
+                    {
+                        venue.ImageUrl = existingVenue.ImageUrl;
+                    }
+
+                    _context.Update(venue);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Venue updated successfully.";
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _context.Venues.AnyAsync(e => e.VenueID == venue.VenueID)) return NotFound();
+                    throw;
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(venue);
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
+            if (id == null) return NotFound();
+            var venue = await _context.Venues.FirstOrDefaultAsync(v => v.VenueID == id);
             if (venue == null) return NotFound();
             return View(venue);
         }
 
-        [HttpPost]
-        public IActionResult DeleteConfirmed(int id)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
-            if (venue != null)
+            var venue = await _context.Venues.FindAsync(id);
+            if (venue == null) return RedirectToAction(nameof(Index));
+
+            bool hasBookings = await _context.Bookings.AnyAsync(b => b.VenueID == id);
+            bool hasEvents = await _context.Events.AnyAsync(e => e.VenueID == id);
+
+            if (hasBookings || hasEvents)
             {
-                venues.Remove(venue);
+                TempData["Error"] = "This venue cannot be deleted because it is linked to existing events or bookings.";
+                return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction("Index");
+            _context.Venues.Remove(venue);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Venue deleted successfully.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

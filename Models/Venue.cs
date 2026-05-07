@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace EventEase.Models
 {
@@ -6,13 +6,19 @@ namespace EventEase.Models
     {
         public int VenueID { get; set; }
 
+        [Required(ErrorMessage = "Venue name is required")]
+        [StringLength(100)]
+        public string? VenueName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Location is required")]
+        [StringLength(100)]
+        public string? Location { get; set; } = string.Empty;
+
         [Required]
-        public string VenueName { get; set; }
-
-        public string Location { get; set; }
-
+        [Range(1, 100000, ErrorMessage = "Capacity must be greater than 0")]
         public int Capacity { get; set; }
 
-        public string ImageUrl { get; set; }
+        [Display(Name = "Image")]
+        public string? ImageUrl { get; set; }
     }
 }

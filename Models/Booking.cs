@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventEase.Models
 {
@@ -6,16 +7,19 @@ namespace EventEase.Models
     {
         public int BookingID { get; set; }
 
+        [Required(ErrorMessage = "Please select an event")]
         public int EventID { get; set; }
 
+        [Required(ErrorMessage = "Please select a venue")]
         public int VenueID { get; set; }
 
+        [Required(ErrorMessage = "Booking date is required")]
         public DateTime BookingDate { get; set; }
 
         [ForeignKey("EventID")]
-        public Event Event { get; set; }
+        public Event? Event { get; set; }
 
         [ForeignKey("VenueID")]
-        public Venue Venue { get; set; }
+        public Venue? Venue { get; set; }
     }
 }

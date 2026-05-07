@@ -1,13 +1,12 @@
-﻿@model EventEase.Models.Booking
+@model EventEase.Models.Booking
 
 <h2>Delete Booking</h2>
+<p>Are you sure you want to delete booking <strong>@Model.BookingID</strong>?</p>
+<p><strong>Event:</strong> @Model.Event?.EventName</p>
+<p><strong>Venue:</strong> @Model.Venue?.VenueName</p>
+<p><strong>Date:</strong> @Model.BookingDate.ToString("yyyy-MM-dd HH:mm")</p>
 
-<p>Are you sure you want to delete this booking?</p>
-<p><strong>Event:</strong> @Model.Event.EventName</p>
-<p><strong>Venue:</strong> @Model.Venue.VenueName</p>
-<p><strong>Date:</strong> @Model.BookingDate</p>
-
-<<form asp-action="DeleteConfirmed" asp-route-id="@Model.EventID">
+<form asp-action="Delete" asp-route-id="@Model.BookingID" method="post">
     <input type="hidden" asp-for="BookingID" />
     <button type="submit" class="btn btn-danger">Delete</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
