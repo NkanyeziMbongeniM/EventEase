@@ -5,6 +5,11 @@
 }
 
 <h2>Booking Details</h2>
+<p><strong>Booking ID:</strong> @Model.BookingID</p>
+<p><strong>Event:</strong> @Model.Event?.EventName</p>
+<p><strong>Venue:</strong> @Model.Venue?.VenueName</p>
+<p><strong>Location:</strong> @Model.Venue?.Location</p>
+<p><strong>Booking Date:</strong> @Model.BookingDate.ToString("yyyy-MM-dd HH:mm")</p>
 
 <dl class="row">
     <dt class="col-sm-2">Booking ID</dt>

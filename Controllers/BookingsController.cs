@@ -71,6 +71,7 @@ namespace EventEase.Controllers
                 .FirstOrDefaultAsync(b => b.BookingID == id);
 
             if (booking == null) return NotFound();
+
             return View(booking);
         }
 

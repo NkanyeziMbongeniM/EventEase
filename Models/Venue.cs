@@ -7,6 +7,14 @@ namespace EventEase.Models
     {
         public int VenueID { get; set; }
 
+        [Required(ErrorMessage = "Venue name is required")]
+        [StringLength(100)]
+        public string? VenueName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Location is required")]
+        [StringLength(100)]
+        public string? Location { get; set; } = string.Empty;
+
         [Required]
         [StringLength(100)]
         public string VenueName { get; set; } = string.Empty;

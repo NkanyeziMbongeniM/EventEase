@@ -5,6 +5,10 @@
 }
 
 <h2>Event Details</h2>
+<p><strong>Name:</strong> @Model.EventName</p>
+<p><strong>Date:</strong> @Model.EventDate.ToString("yyyy-MM-dd HH:mm")</p>
+<p><strong>Description:</strong> @Model.Description</p>
+<p><strong>Venue:</strong> @Model.Venue?.VenueName</p>
 
 <dl class="row">
     <dt class="col-sm-2">Event Name</dt>
