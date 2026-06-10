@@ -1,11 +1,23 @@
-﻿@model EventEase.Models.Event
+@model EventEase.Models.Event
+
+@{
+    ViewData["Title"] = "Event Details";
+}
 
 <h2>Event Details</h2>
 
-<p>@Model.EventName</p>
-<p>@Model.EventDate</p>
-<p>@Model.Description</p>
-<p>Venue: @Model.Venue.VenueName</p>
+<dl class="row">
+    <dt class="col-sm-2">Event Name</dt>
+    <dd class="col-sm-10">@Model.EventName</dd>
+    <dt class="col-sm-2">Event Type</dt>
+    <dd class="col-sm-10">@Model.EventType?.EventTypeName</dd>
+    <dt class="col-sm-2">Date</dt>
+    <dd class="col-sm-10">@Model.EventDate</dd>
+    <dt class="col-sm-2">Description</dt>
+    <dd class="col-sm-10">@Model.Description</dd>
+    <dt class="col-sm-2">Venue</dt>
+    <dd class="col-sm-10">@Model.Venue?.VenueName</dd>
+</dl>
 
-<a asp-action="Edit" asp-route-id="@Model.EventID">Edit</a>
-<a asp-action="Index">Back to List</a>
+<a asp-action="Edit" asp-route-id="@Model.EventID" class="btn btn-warning">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

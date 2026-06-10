@@ -1,18 +1,46 @@
-﻿@model EventEase.Models.Event
+@model EventEase.Models.Event
+
+@{
+    ViewData["Title"] = "Create Event";
+}
 
 <h2>Create Event</h2>
+
 <form asp-action="Create" method="post">
-    <label>Name:</label>
-    <input asp-for="EventName" />
-    <br />
-    <label>Date:</label>
-    <input asp-for="EventDate" type="date" />
-    <br />
-    <label>Description:</label>
-    <input asp-for="Description" />
-    <br />
-    <label>VenueID:</label>
-    <input asp-for="VenueID" />
-    <br />
-    <button type="submit">Create</button>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="EventName" class="form-label"></label>
+        <input asp-for="EventName" class="form-control" />
+        <span asp-validation-for="EventName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="EventTypeID" class="form-label">Event Type</label>
+        <select asp-for="EventTypeID" asp-items="ViewBag.EventTypes" class="form-select">
+            <option value="">Select event type</option>
+        </select>
+        <span asp-validation-for="EventTypeID" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="EventDate" class="form-label"></label>
+        <input asp-for="EventDate" type="datetime-local" class="form-control" />
+        <span asp-validation-for="EventDate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="VenueID" class="form-label">Venue</label>
+        <select asp-for="VenueID" asp-items="ViewBag.Venues" class="form-select">
+            <option value="">Select venue</option>
+        </select>
+        <span asp-validation-for="VenueID" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
 </form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

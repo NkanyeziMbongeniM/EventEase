@@ -1,27 +1,45 @@
-﻿using Microsoft.AspNetCore.Mvc;
 using EventEase.Models;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventEase.Controllers
 {
     public class VenuesController : Controller
     {
-        private static List<Venue> venues = new List<Venue>
-        {
-            new Venue { VenueID = 1, VenueName = "Stadium A", Location = "City X", Capacity = 5000, ImageUrl = "" },
-            new Venue { VenueID = 2, VenueName = "Gallery B", Location = "City Y", Capacity = 200, ImageUrl = "" }
-        };
+        private readonly EventEaseContext _context;
 
-        public IActionResult Index()
+        public VenuesController(EventEaseContext context)
         {
-            return View(venues);
+            _context = context;
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Index(string? searchString, bool? isAvailable)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentAvailability"] = isAvailable;
+
+            var venues = _context.Venues.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchString))
+            {
+                venues = venues.Where(v => v.VenueName.Contains(searchString) || v.Location.Contains(searchString));
+            }
+
+            if (isAvailable.HasValue)
+            {
+                venues = venues.Where(v => v.IsAvailable == isAvailable.Value);
+            }
+
+            return View(await venues.ToListAsync());
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var venue = await _context.Venues.FirstOrDefaultAsync(v => v.VenueID == id);
             if (venue == null) return NotFound();
+
             return View(venue);
         }
 
@@ -31,53 +49,88 @@ namespace EventEase.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Venue venue)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Venue venue)
         {
-            venue.VenueID = venues.Count + 1;
-            venues.Add(venue);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                _context.Add(venue);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Venue created successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(venue);
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
+            if (id == null) return NotFound();
+
+            var venue = await _context.Venues.FindAsync(id);
             if (venue == null) return NotFound();
+
             return View(venue);
         }
 
         [HttpPost]
-        public IActionResult Edit(Venue venue)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Venue venue)
         {
-            var existingVenue = venues.FirstOrDefault(v => v.VenueID == venue.VenueID);
+            if (id != venue.VenueID) return NotFound();
 
-            if (existingVenue != null)
+            if (ModelState.IsValid)
             {
-                existingVenue.VenueName = venue.VenueName;
-                existingVenue.Location = venue.Location;
-                existingVenue.Capacity = venue.Capacity;
-                existingVenue.ImageUrl = venue.ImageUrl;
+                try
+                {
+                    _context.Update(venue);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Venue updated successfully.";
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await VenueExists(venue.VenueID)) return NotFound();
+                    throw;
+                }
+                return RedirectToAction(nameof(Index));
             }
-
-            return RedirectToAction("Index");
-        }
-
-        public IActionResult Delete(int id)
-        {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
-            if (venue == null) return NotFound();
             return View(venue);
         }
 
-        [HttpPost]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            var venue = venues.FirstOrDefault(v => v.VenueID == id);
-            if (venue != null)
+            if (id == null) return NotFound();
+
+            var venue = await _context.Venues.FirstOrDefaultAsync(v => v.VenueID == id);
+            if (venue == null) return NotFound();
+
+            return View(venue);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var venue = await _context.Venues.FindAsync(id);
+            if (venue == null) return RedirectToAction(nameof(Index));
+
+            var hasBookings = await _context.Bookings.AnyAsync(b => b.VenueID == id);
+            var hasEvents = await _context.Events.AnyAsync(e => e.VenueID == id);
+
+            if (hasBookings || hasEvents)
             {
-                venues.Remove(venue);
+                TempData["Error"] = "This venue cannot be deleted because it is linked to an existing event or booking.";
+                return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction("Index");
+            _context.Venues.Remove(venue);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Venue deleted successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<bool> VenueExists(int id)
+        {
+            return await _context.Venues.AnyAsync(e => e.VenueID == id);
         }
     }
 }
